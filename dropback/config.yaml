@@ -27,4 +27,4 @@ arch:
   - armhf
   - armv7
   - i386
-image: "matthewhadley/{arch}-dropbox"
+image: "matthewhadley/homeassistant-dropbox-addon-{arch}"
