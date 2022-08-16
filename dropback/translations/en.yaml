@@ -1,0 +1,30 @@
+---
+configuration:
+  oauth_app_key:
+    name: App Key
+    description: >-
+      Your Dropbox App's Key.
+  oauth_app_secret:
+    name: App Secret
+    description: >-
+      Your Dropbox App's Secret.
+  oauth_access_code:
+    name: Access Code
+    description: >-
+      Visit the url https://www.dropbox.com/oauth2/authorize?client_id=YOUR_APP_KEY_HERE&token_access_type=offline&response_type=code to get your one-use Access Code.
+      Remember to replace the YOUR_APP_KEY_HERE value with the one above.
+
+      This Access Code typically expires in ~4hrs and is used on first run of the Add-on to get a long lived Refresh Token. This token will be stored encrypted
+      at /config/719b45ef_dropback.conf
+  folder:
+    name: Folder
+    description: >-
+      Dropbox folder to sync backups to.
+  delete_older_than:
+    name: Delete backups older than this many days
+    description: >-
+      Set to 0 to never delete backups.
+  sync_deletes:
+    name: Sync Deletes
+    description: >-
+      Sync local backup deletes to also be deleted on Dropbox.

@@ -1,0 +1,30 @@
+name: "Dropback"
+description: "Sync Home Assistant backups to Dropbox"
+version: "0.2.0"
+slug: "dropback"
+init: false
+stdin: true
+map:
+  - backup:rw
+  - config:rw
+options:
+  oauth_app_key: null
+  oauth_app_secret: null
+  oauth_access_code: null
+  folder: "/"
+  delete_older_than: 0
+  sync_deletes: false
+schema:
+  oauth_app_key: str
+  oauth_app_secret: str
+  oauth_access_code: str
+  folder: str?
+  delete_older_than: int(0,)?
+  sync_deletes: bool
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+image: "matthewhadley/image-{arch}-dropbox"
