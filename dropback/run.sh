@@ -26,6 +26,12 @@ if [ ! -e "$CONFIG_FILE" ]; then
     -d code="$OAUTH_ACCESS_CODE" \
     --silent | jq -r .refresh_token)
 
+    if [[ "$OAUTH_REFRESH_TOKEN" = "null" ]]; then
+        log "Error getting Refresh Token."
+        log "Please check App Key and App Secret configuration values and generate a new Access Token"
+        exit 1
+    fi
+
     echo "CONFIGFILE_VERSION=2.0" > "$CONFIG_FILE"
     echo "OAUTH_APP_KEY=$OAUTH_APP_KEY" >> "$CONFIG_FILE"
     echo "OAUTH_APP_SECRET=$OAUTH_APP_SECRET" >> "$CONFIG_FILE"
@@ -35,12 +41,15 @@ else
 fi
 
 log "Validating Dropbox access... "
-./dropbox_uploader.sh -q -f $CONFIG_FILE space > /dev/null
-if [ $? -eq 0 ]; then
-   log "Dropbox access OK"
+EXIT_CODE=0
+./dropbox_uploader.sh -q -f $CONFIG_FILE space > /dev/null || EXIT_CODE=$?
+if [ $EXIT_CODE -eq 0 ]; then
+    log "Dropbox access OK"
 else
-   log "ERROR validating Dropbox access. Please check configuration and restart."
-   exit 1
+    log "ERROR validating Dropbox access"
+    log "Please check App Key and App Secret configuration values and generate a new Access Token"
+    rm "$CONFIG_FILE"
+    exit 1
 fi
 
 log "Listening for input via stdin service call..."

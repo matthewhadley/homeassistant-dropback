@@ -1,3 +1,9 @@
+## [2.1.0] - 2022-08-18
+
+### Added
+
+- Error checking and messaging for first set-up
+
 ## [2.0.0] - 2022-08-18
 
 ### Changed
