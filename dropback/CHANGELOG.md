@@ -1,3 +1,9 @@
+## [2.0.0] - 2022-08-18
+
+### Changed
+
+- Use available persistent storage at `/data` for conf file
+
 ## [1.1.1] - 2022-08-18
 
 ### Added
