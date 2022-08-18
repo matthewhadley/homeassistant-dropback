@@ -1,3 +1,9 @@
+## [1.1.1] - 2022-08-18
+
+### Added
+
+- Homepage url in config
+
 ## [1.1.0] - 2022-08-17
 
 ### Added
