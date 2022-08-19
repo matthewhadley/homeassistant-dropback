@@ -1,3 +1,9 @@
+## [2.2.0] - 2022-08-18
+
+### Changed
+
+- use bashio logging and script exit functions
+
 ## [2.1.1] - 2022-08-18
 
 ### Changed
