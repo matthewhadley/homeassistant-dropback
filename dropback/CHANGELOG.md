@@ -1,3 +1,9 @@
+## [2.2.1] - 2022-08-18
+
+### Changed
+
+- update documentation for configuration
+
 ## [2.2.0] - 2022-08-18
 
 ### Changed
