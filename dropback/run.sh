@@ -46,7 +46,7 @@ EXIT_CODE=0
 if [ $EXIT_CODE -eq 0 ]; then
     bashio::log.info "Dropbox access OK"
 else
-    bashio::log.fatal "Error getting Refresh Token"
+    bashio::log.fatal "Failed validating Dropbox access"
     bashio::log.fatal "Please check App Key and App Secret configuration values and generate a new Access Token"
     rm "$CONFIG_FILE"
     bashio::exit.nok
