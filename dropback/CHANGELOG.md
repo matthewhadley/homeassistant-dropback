@@ -1,3 +1,9 @@
+## [2.3.0] - 2022-08-18
+
+### Changed
+
+- no longer mount config dir
+
 ## [2.2.1] - 2022-08-18
 
 ### Changed
