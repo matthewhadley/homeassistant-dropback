@@ -1,3 +1,9 @@
+## [2.3.1] - 2022-08-19
+
+### Changed
+
+- update error message for failed Dropbox access validation
+
 ## [2.3.0] - 2022-08-18
 
 ### Changed
