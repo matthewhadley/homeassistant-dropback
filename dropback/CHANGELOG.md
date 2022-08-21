@@ -1,3 +1,9 @@
+## [2.4.0] - 2022-08-21
+
+### Changed
+
+- add date to default bashio log timestampß
+
 ## [2.3.1] - 2022-08-19
 
 ### Changed

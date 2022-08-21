@@ -13,6 +13,9 @@ FOLDER=$(echo "$FOLDER" | tr -s /)
 BACKUP_DIR="/backup"
 CONFIG_FILE="/data/uploader.conf"
 
+# add date to default bashio log timestamp
+declare __BASHIO_LOG_TIMESTAMP="%Y-%m-%d %T"
+
 bashio::log.info "Initializing Dropback"
 
 if [ ! -e "$CONFIG_FILE" ]; then
