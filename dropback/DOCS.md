@@ -22,6 +22,8 @@ You will need to create a Dropbox App and generate an Access Token for this Add-
 
 Dropback uploads all backup files (specifically, all `.tar` files) in the `/backup` directory to a specified folder in your Dropbox. This target folder is specified via the `Folder` configuration option. If `Folder` is left blank, or set to `/`, the root folder the App has access to is used. Using a Scoped Access App is highly recommended, where the App is restricted to its App folder only.
 
+By default, the filename is used for saving a backup file on Dropbox (such as `3baddf04.tar`). To use the backup name that is set as part of the backup metadata, set the `Use Backup Names` option.
+
 If set to a non zero value, Dropback will `Delete backups older than this many days`. Set to `0` to never Delete backups. You can also sync the deletion of backups to Dropbox by setting the `Sync Deletes` flag. This will mean that Dropbox will also only keep backups up to the set number of days.
 
 To access your personal Dropobox, this Add-on requires you create an App and generate an Access Token. Follow these steps to create an App and Access Token:

@@ -1,8 +1,18 @@
+## [3.0.0] - 2022-08-25
+
+### Added
+
+- Support use of backup names or filenames when syncing to Dropbox
+
+### Changed
+
+- Logging output format
+
 ## [2.4.0] - 2022-08-21
 
 ### Changed
 
-- add date to default bashio log timestampß
+- add date to default bashio log timestamp
 
 ## [2.3.1] - 2022-08-19
 

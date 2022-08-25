@@ -5,19 +5,36 @@ OAUTH_APP_KEY="$(bashio::config 'oauth_app_key')"
 OAUTH_APP_SECRET="$(bashio::config 'oauth_app_secret')"
 OAUTH_ACCESS_CODE="$(bashio::config 'oauth_access_code')"
 FOLDER="$(bashio::config 'folder')"
+USE_BACKUP_NAMES="$(bashio::config 'use_backup_names')"
 DELETE_OLDER_THAN="$(bashio::config 'delete_older_than')"
 SYNC_DELETES="$(bashio::config 'sync_deletes')"
 
 # remove extra slashes
 FOLDER=$(echo "$FOLDER" | tr -s /)
 BACKUP_DIR="/backup"
+BACKUP_API="/backups"
 CONFIG_FILE="/data/uploader.conf"
 
 # add date to default bashio log timestamp
 declare __BASHIO_LOG_TIMESTAMP="%Y-%m-%d %T"
 
-bashio::log.info "Initializing Dropback"
+# return the path a backup should exist on Dropbox
+get_dropbox_file_path() {
+    FILE=$1
 
+    BASENAME=$(basename "$FILE")
+    if [[ $USE_BACKUP_NAMES = "true" ]]; then
+        SLUG="${BASENAME%.*}"
+        EXT="${BASENAME##*.}"
+        BACKUP_NAME=$(bashio::api.supervisor "GET" "$BACKUP_API/$SLUG/info" | jq -r .name)
+        echo "$FOLDER/$BACKUP_NAME.$EXT" | tr -s /
+    else
+        echo "$FOLDER/$BASENAME" | tr -s /
+    fi
+}
+
+# configure Dropbox access
+bashio::log.info "Initializing Dropback"
 if [ ! -e "$CONFIG_FILE" ]; then
     bashio::log.info "No config file found, requesting long lived Refresh Token..."
     OAUTH_REFRESH_TOKEN=$(curl https://api.dropbox.com/oauth2/token \
@@ -43,6 +60,7 @@ else
     bashio::log.info "Existing config file found"
 fi
 
+# validate Dropbox access
 bashio::log.info "Validating Dropbox access... "
 EXIT_CODE=0
 ./dropbox_uploader.sh -q -f $CONFIG_FILE space > /dev/null || EXIT_CODE=$?
@@ -55,9 +73,10 @@ else
     bashio::exit.nok
 fi
 
-bashio::log.info "Listening for input via stdin service call..."
 
 # listen for input
+bashio::log.info "Listening for input via stdin service call..."
+
 while read -r INPUT; do
     # strip quotes
     INPUT=${INPUT:1:-1}
@@ -70,28 +89,46 @@ while read -r INPUT; do
         else
             # find files older than X days, delete locally and delete on dropbox
             if [[ $DELETE_OLDER_THAN != "0" ]]; then
-                bashio::log.info "Deleting files older than $DELETE_OLDER_THAN day(s)"
+                bashio::log.info "Deleting files older than $DELETE_OLDER_THAN day(s)..."
                 # adjust DELETE_OLDER_THAN value down by 1 for correct mtime value
                 find $BACKUP_DIR -maxdepth 1 -mtime +$(($DELETE_OLDER_THAN-1)) -type f -name "*.tar" -print0 |
                 while IFS= read -r -d '' FILE; do
-                    rm "$FILE"
-                    bashio::log.info "Deleted local file $FILE"
+                    # get Dropbox file path to use to remove from Dropbox after local delete
                     if [[ $SYNC_DELETES = "true" ]]; then
-                        BASENAME=$(basename "$FILE")
-                        FILE_PATH=$(echo "$FOLDER/$BASENAME" | tr -s /)
-                        bashio::log.info "Sync delete with Dropbox..."
-                        ./dropbox_uploader.sh -f $CONFIG_FILE delete "$FILE_PATH"
+                        FILE_PATH=$(get_dropbox_file_path "$FILE")
+                    fi
+                    bashio::log.info "Deleted local file $FILE"
+                    rm "$FILE"
+                    if [[ $SYNC_DELETES = "true" ]]; then
+                        bashio::log.info "Delete $FILE_PATH from Dropbox..."
+                        EXIT_CODE=0
+                        ./dropbox_uploader.sh -f $CONFIG_FILE delete "$FILE_PATH" 1> /dev/null || EXIT_CODE=$?
+                        if [ $EXIT_CODE -eq 0 ]; then
+                            bashio::log.info "Deleted Dropbox file $FILE_PATH"
+                        else
+                            bashio::log.fatal "Failed to delete file from Dropbox"
+                        fi
                     fi
                 done
                 bashio::log.info "Done with deletes"
             fi
 
-            # find remaining files and upload to dropbox
-            bashio::log.info "Uploading local files to Dropbox..."
-            ./dropbox_uploader.sh -s -f $CONFIG_FILE upload $BACKUP_DIR/*.tar "$FOLDER"
-            bashio::log.info "Done with uploads"
-            bashio::log.info "Sync done"
-            fi
+            # find remaining files and sync to dropbox
+            bashio::log.info "Syncing local files to Dropbox..."
+            find $BACKUP_DIR -maxdepth 1 -type f -name "*.tar" -print0 |
+            while IFS= read -r -d '' FILE; do
+                FILE_PATH=$(get_dropbox_file_path "$FILE")
+                EXIT_CODE=0
+                ./dropbox_uploader.sh -s -f $CONFIG_FILE upload "$FILE" "$FILE_PATH" 1> /dev/null || EXIT_CODE=$?
+                if [ $EXIT_CODE -eq 0 ]; then
+                    bashio::log.info "Synced $FILE to Dropbox at $FILE_PATH"
+                else
+                    bashio::log.fatal "Failed to sync file to Dropbox"
+                fi
+            done
+            bashio::log.info "Syncing done"
+
+        fi
     else
         # received unknown input
         bashio::log.notice "Ignoring unknown input: $INPUT"
