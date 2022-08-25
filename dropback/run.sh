@@ -27,6 +27,10 @@ get_dropbox_file_path() {
         SLUG="${BASENAME%.*}"
         EXT="${BASENAME##*.}"
         BACKUP_NAME=$(bashio::api.supervisor "GET" "$BACKUP_API/$SLUG/info" | jq -r .name)
+        # if no backup name in metadata, use filename
+        if [[ "$BACKUP_NAME" = "" ]]; then
+            BACKUP_NAME=$SLUG
+        fi
         echo "$FOLDER/$BACKUP_NAME.$EXT" | tr -s /
     else
         echo "$FOLDER/$BASENAME" | tr -s /

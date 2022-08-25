@@ -1,3 +1,9 @@
+## [3.1.0] - 2022-08-25
+
+### Fixed
+
+- Check for empty backup names
+
 ## [3.0.0] - 2022-08-25
 
 ### Added
