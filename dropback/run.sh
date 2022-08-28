@@ -14,6 +14,7 @@ FOLDER=$(echo "$FOLDER" | tr -s /)
 BACKUP_DIR="/backup"
 BACKUP_API="/backups"
 CONFIG_FILE="/data/uploader.conf"
+REQUIRED_SCOPE="files.content.write"
 
 # add date to default bashio log timestamp
 declare __BASHIO_LOG_TIMESTAMP="%Y-%m-%d %T"
@@ -41,20 +42,36 @@ get_dropbox_file_path() {
 bashio::log.info "Initializing Dropback"
 if [ ! -e "$CONFIG_FILE" ]; then
     bashio::log.info "No config file found, requesting long lived Refresh Token..."
-    OAUTH_REFRESH_TOKEN=$(curl https://api.dropbox.com/oauth2/token \
+    RESPONSE=$(curl https://api.dropbox.com/oauth2/token \
     -d grant_type=authorization_code \
     -u "$OAUTH_APP_KEY:$OAUTH_APP_SECRET" \
     -d code="$OAUTH_ACCESS_CODE" \
-    --silent | jq -r .refresh_token)
+    --silent)
 
+    OAUTH_REFRESH_TOKEN=$(echo "$RESPONSE" | jq -r .refresh_token)
     if [[ "$OAUTH_REFRESH_TOKEN" = "null" ]]; then
+        # an error getting the Refresh Token
+        ERROR=$(echo "$RESPONSE" | jq -r .error)
+        ERROR_DESCRIPTION=$(echo "$RESPONSE" | jq -r .error_description)
+
         bashio::log.fatal "Error getting Refresh Token"
+        bashio::log.fatal "$ERROR $ERROR_DESCRIPTION"
         bashio::log.fatal "Please check App Key and App Secret configuration values and generate a new Access Token"
         bashio::exit.nok
     else
-        bashio::log.info "Got Refresh Token"
+        # ensure app has correct permissions
+        SCOPE=$(echo "$RESPONSE" | jq -r .scope)
+        EXIT_CODE=0
+        echo "$SCOPE" | grep -q "$REQUIRED_SCOPE" || EXIT_CODE=$?
+        if [ $EXIT_CODE -ne 0 ]; then
+            bashio::log.fatal "Missing scope \"$REQUIRED_SCOPE\""
+            bashio::log.fatal "Please ensure the app has scope \"$REQUIRED_SCOPE\" enabled in the \"Permissions\" tab on dropbox.com/developers/apps"
+            bashio::log.fatal "Please check App Key and App Secret configuration values and generate a new Access Token"
+            bashio::exit.nok
+        fi
     fi
 
+    bashio::log.info "Got Refresh Token"
     echo "CONFIGFILE_VERSION=2.0" > "$CONFIG_FILE"
     echo "OAUTH_APP_KEY=$OAUTH_APP_KEY" >> "$CONFIG_FILE"
     echo "OAUTH_APP_SECRET=$OAUTH_APP_SECRET" >> "$CONFIG_FILE"
@@ -66,17 +83,18 @@ fi
 
 # validate Dropbox access
 bashio::log.info "Validating Dropbox access... "
+
 EXIT_CODE=0
-./dropbox_uploader.sh -q -f $CONFIG_FILE space > /dev/null || EXIT_CODE=$?
+RESPONSE=$(./dropbox_uploader.sh -q -f $CONFIG_FILE space) || EXIT_CODE=$?
 if [ $EXIT_CODE -eq 0 ]; then
     bashio::log.info "Dropbox access OK"
 else
     bashio::log.fatal "Failed validating Dropbox access"
+    bashio::log.fatal "$RESPONSE"
     bashio::log.fatal "Please check App Key and App Secret configuration values and generate a new Access Token"
     rm "$CONFIG_FILE"
     bashio::exit.nok
 fi
-
 
 # listen for input
 bashio::log.info "Listening for input via stdin service call..."
@@ -106,11 +124,12 @@ while read -r INPUT; do
                     if [[ $SYNC_DELETES = "true" ]]; then
                         bashio::log.info "Delete $FILE_PATH from Dropbox..."
                         EXIT_CODE=0
-                        ./dropbox_uploader.sh -f $CONFIG_FILE delete "$FILE_PATH" 1> /dev/null || EXIT_CODE=$?
+                        RESPONSE=$(./dropbox_uploader.sh -q -f $CONFIG_FILE delete "$FILE_PATH") || EXIT_CODE=$?
                         if [ $EXIT_CODE -eq 0 ]; then
                             bashio::log.info "Deleted Dropbox file $FILE_PATH"
                         else
                             bashio::log.fatal "Failed to delete file from Dropbox"
+                            bashio::log.fatal "$RESPONSE"
                         fi
                     fi
                 done
@@ -123,11 +142,12 @@ while read -r INPUT; do
             while IFS= read -r -d '' FILE; do
                 FILE_PATH=$(get_dropbox_file_path "$FILE")
                 EXIT_CODE=0
-                ./dropbox_uploader.sh -s -f $CONFIG_FILE upload "$FILE" "$FILE_PATH" 1> /dev/null || EXIT_CODE=$?
+                RESPONSE=$(./dropbox_uploader.sh -q -s -f $CONFIG_FILE upload "$FILE" "$FILE_PATH") || EXIT_CODE=$?
                 if [ $EXIT_CODE -eq 0 ]; then
                     bashio::log.info "Synced $FILE to Dropbox at $FILE_PATH"
                 else
                     bashio::log.fatal "Failed to sync file to Dropbox"
+                    bashio::log.fatal "$RESPONSE"
                 fi
             done
             bashio::log.info "Syncing done"

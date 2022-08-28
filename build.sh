@@ -5,7 +5,7 @@ docker run \
     --privileged \
     -v ~/.docker:/root/.docker \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    -v $(pwd):/data \
+    -v "$(pwd)":/data \
     homeassistant/aarch64-builder \
     --all \
     --target dropback

@@ -1,3 +1,10 @@
+## [4.0.0] - 2022-08-28
+
+### Added
+
+- Check for incorrect App permissions
+- Capture and output errors from dropbox_uploader.sh script
+
 ## [3.1.0] - 2022-08-25
 
 ### Fixed
