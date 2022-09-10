@@ -1,7 +1,8 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-COPY VERSION /
+COPY config.yaml /
+RUN grep version < config.yaml | grep -oe '[0-9\.]*' > VERSION && rm config.yaml
 
 COPY run.sh /
 RUN chmod a+x /run.sh
@@ -14,7 +15,7 @@ RUN chmod a+x /run.sh
 # remove_temp_files
 # exit $ERROR_STATUS
 #
-RUN curl --silent "https://raw.githubusercontent.com/andreafabrizi/Dropbox-Uploader/master/dropbox_uploader.sh" | head -n 1827 > /dropbox_uploader.sh
+RUN curl --silent "https://raw.githubusercontent.com/andreafabrizi/Dropbox-Uploader/11fb8f736064730dd21ff85d68dfcc8aacfdf559/dropbox_uploader.sh" | head -n 1827 > /dropbox_uploader.sh
 RUN echo 'if [[ $ERROR_STATUS -ne 0 ]]; then cat $RESPONSE_FILE | sed -n -e '"'"'/^[[:space:]]*$/,$p\'"'"' | sed '"'"'/^$/d\'"'"';fi;remove_temp_files;exit $ERROR_STATUS' >> /dropbox_uploader.sh
 RUN chmod a+x /dropbox_uploader.sh
 

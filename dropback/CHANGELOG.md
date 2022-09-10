@@ -1,3 +1,10 @@
+## [5.0.1] - 2022-09-10
+
+### Changed
+
+- Pull version directly from config.yaml
+- Pin version of Dropbox Uploader to Commit 11fb8f7
+
 ## [5.0.0] - 2022-09-10
 
 ### BREAKING
