@@ -1,6 +1,8 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
+COPY VERSION /
+
 COPY run.sh /
 RUN chmod a+x /run.sh
 

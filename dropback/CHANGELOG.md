@@ -1,3 +1,18 @@
+## [5.0.0] - 2022-09-10
+
+### BREAKING
+
+- Don’t exit process on failure to delete or upload, but log fatal error instead
+
+### Added
+
+- Add check for network connectivity
+
+### Changed
+
+- Output Dropback version in logs
+- Make log messaging more consistent
+
 ## [4.0.0] - 2022-08-28
 
 ### Added

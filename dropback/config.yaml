@@ -1,7 +1,7 @@
 name: "Dropback"
 description: "Sync Home Assistant backups to Dropbox"
 url: "https://github.com/matthewhadley/homeassistant-dropback"
-version: "4.0.0"
+version: "5.0.0"
 slug: "dropback"
 init: false
 stdin: true
@@ -31,4 +31,4 @@ arch:
   - armhf
   - armv7
   - i386
-image: "matthewhadley/homeassistant-dropbox-addon-{arch}"
+#image: "matthewhadley/homeassistant-dropbox-addon-{arch}"

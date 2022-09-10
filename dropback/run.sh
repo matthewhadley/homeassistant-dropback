@@ -15,9 +15,31 @@ BACKUP_DIR="/backup"
 BACKUP_API="/backups"
 CONFIG_FILE="/data/uploader.conf"
 REQUIRED_SCOPE="files.content.write"
+DROPBOX_ACCESS_TOKEN_URL="https://www.dropbox.com/oauth2/authorize?client_id=${OAUTH_APP_KEY}&token_access_type=offline&response_type=code"
+DROPBOX_API_CHECK_URL="api.dropboxapi.com"
+DROPBACK_VERSION=$(cat VERSION)
+
 
 # add date to default bashio log timestamp
 declare __BASHIO_LOG_TIMESTAMP="%Y-%m-%d %T"
+
+warn_about_access_token() {
+    bashio::log.fatal "Please check App Key and App Secret configuration values and generate a new Access Token"
+    bashio::log.fatal "A new Access Token can be generated at: $DROPBOX_ACCESS_TOKEN_URL"
+}
+
+check_network_access() {
+    EXIT_CODE=0
+    curl --silent $DROPBOX_API_CHECK_URL || EXIT_CODE=$?
+    if [ $EXIT_CODE -ne 0 ]; then
+        bashio::log.fatal "Unable to reach $DROPBOX_API_CHECK_URL"
+        [ $EXIT_CODE -eq 6 ] && bashio::log.fatal "Could not resolve host - is there a problem with the network?"
+        [ $EXIT_CODE -eq 7 ] && bashio::log.fatal "Failed to connect to host - is there a problem with the network?"
+    fi
+    EXIT_CODE=0
+}
+
+bashio::log.info "Dropback $DROPBACK_VERSION"
 
 # return the path a backup should exist on Dropbox
 get_dropbox_file_path() {
@@ -42,6 +64,9 @@ get_dropbox_file_path() {
 bashio::log.info "Initializing Dropback"
 if [ ! -e "$CONFIG_FILE" ]; then
     bashio::log.info "No config file found, requesting long lived Refresh Token..."
+
+    check_network_access
+
     RESPONSE=$(curl https://api.dropbox.com/oauth2/token \
     -d grant_type=authorization_code \
     -u "$OAUTH_APP_KEY:$OAUTH_APP_SECRET" \
@@ -56,7 +81,7 @@ if [ ! -e "$CONFIG_FILE" ]; then
 
         bashio::log.fatal "Error getting Refresh Token"
         bashio::log.fatal "$ERROR $ERROR_DESCRIPTION"
-        bashio::log.fatal "Please check App Key and App Secret configuration values and generate a new Access Token"
+        warn_about_access_token
         bashio::exit.nok
     else
         # ensure app has correct permissions
@@ -66,7 +91,7 @@ if [ ! -e "$CONFIG_FILE" ]; then
         if [ $EXIT_CODE -ne 0 ]; then
             bashio::log.fatal "Missing scope \"$REQUIRED_SCOPE\""
             bashio::log.fatal "Please ensure the app has scope \"$REQUIRED_SCOPE\" enabled in the \"Permissions\" tab on dropbox.com/developers/apps"
-            bashio::log.fatal "Please check App Key and App Secret configuration values and generate a new Access Token"
+            warn_about_access_token
             bashio::exit.nok
         fi
     fi
@@ -84,14 +109,16 @@ fi
 # validate Dropbox access
 bashio::log.info "Validating Dropbox access... "
 
+check_network_access
+
 EXIT_CODE=0
 RESPONSE=$(./dropbox_uploader.sh -q -f $CONFIG_FILE space) || EXIT_CODE=$?
 if [ $EXIT_CODE -eq 0 ]; then
     bashio::log.info "Dropbox access OK"
 else
     bashio::log.fatal "Failed validating Dropbox access"
-    bashio::log.fatal "$RESPONSE"
-    bashio::log.fatal "Please check App Key and App Secret configuration values and generate a new Access Token"
+    [ "$RESPONSE" != "" ] && bashio::log.fatal "$RESPONSE"
+    warn_about_access_token
     rm "$CONFIG_FILE"
     bashio::exit.nok
 fi
@@ -122,16 +149,18 @@ while read -r INPUT; do
                     bashio::log.info "Deleted local file $FILE"
                     rm "$FILE"
                     if [[ $SYNC_DELETES = "true" ]]; then
-                        bashio::log.info "Delete $FILE_PATH from Dropbox..."
+                        bashio::log.info "Delete $FILE_PATH on Dropbox"
+                        check_network_access
                         EXIT_CODE=0
                         RESPONSE=$(./dropbox_uploader.sh -q -f $CONFIG_FILE delete "$FILE_PATH") || EXIT_CODE=$?
                         if [ $EXIT_CODE -eq 0 ]; then
-                            bashio::log.info "Deleted Dropbox file $FILE_PATH"
+                            bashio::log.info "Deleted file on Dropbox"
                         else
-                            bashio::log.fatal "Failed to delete file from Dropbox"
-                            bashio::log.fatal "$RESPONSE"
+                            bashio::log.fatal "Failed to delete file on Dropbox"
+                            [ "$RESPONSE" != "" ] && bashio::log.fatal "$RESPONSE"
                         fi
                     fi
+                    EXIT_CODE=0
                 done
                 bashio::log.info "Done with deletes"
             fi
@@ -141,14 +170,17 @@ while read -r INPUT; do
             find $BACKUP_DIR -maxdepth 1 -type f -name "*.tar" -print0 |
             while IFS= read -r -d '' FILE; do
                 FILE_PATH=$(get_dropbox_file_path "$FILE")
+                bashio::log.info "Sync $FILE to $FILE_PATH on Dropbox"
+                check_network_access
                 EXIT_CODE=0
                 RESPONSE=$(./dropbox_uploader.sh -q -s -f $CONFIG_FILE upload "$FILE" "$FILE_PATH") || EXIT_CODE=$?
                 if [ $EXIT_CODE -eq 0 ]; then
-                    bashio::log.info "Synced $FILE to Dropbox at $FILE_PATH"
+                    bashio::log.info "Synced file to Dropbox"
                 else
                     bashio::log.fatal "Failed to sync file to Dropbox"
-                    bashio::log.fatal "$RESPONSE"
+                    [ "$RESPONSE" != "" ] && bashio::log.fatal "$RESPONSE"
                 fi
+                EXIT_CODE=0
             done
             bashio::log.info "Syncing done"
 
