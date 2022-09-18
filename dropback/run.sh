@@ -138,7 +138,9 @@ while read -r INPUT; do
         else
             # find files older than X days, delete locally and delete on dropbox
             if [[ $DELETE_OLDER_THAN != "0" ]]; then
-                bashio::log.info "Deleting files older than $DELETE_OLDER_THAN day(s)..."
+                PLURAL=''
+                [ "$DELETE_OLDER_THAN" != "1" ] && PLURAL='s'
+                bashio::log.info "Deleting files older than $DELETE_OLDER_THAN day${PLURAL}..."
                 # adjust DELETE_OLDER_THAN value down by 1 for correct mtime value
                 find $BACKUP_DIR -maxdepth 1 -mtime +$(($DELETE_OLDER_THAN-1)) -type f -name "*.tar" -print0 |
                 while IFS= read -r -d '' FILE; do
@@ -149,14 +151,14 @@ while read -r INPUT; do
                     bashio::log.info "Deleted local file $FILE"
                     rm "$FILE"
                     if [[ $SYNC_DELETES = "true" ]]; then
-                        bashio::log.info "Delete $FILE_PATH on Dropbox"
+                        bashio::log.debug "Delete $FILE_PATH on Dropbox"
                         check_network_access
                         EXIT_CODE=0
                         RESPONSE=$(./dropbox_uploader.sh -q -f $CONFIG_FILE delete "$FILE_PATH") || EXIT_CODE=$?
                         if [ $EXIT_CODE -eq 0 ]; then
-                            bashio::log.info "Deleted file on Dropbox"
+                            bashio::log.info "Deleted $FILE_PATH on Dropbox"
                         else
-                            bashio::log.fatal "Failed to delete file on Dropbox"
+                            bashio::log.fatal "Failed to delete $FILE_PATH on Dropbox"
                             [ "$RESPONSE" != "" ] && bashio::log.fatal "$RESPONSE"
                         fi
                     fi
@@ -170,14 +172,14 @@ while read -r INPUT; do
             find $BACKUP_DIR -maxdepth 1 -type f -name "*.tar" -print0 |
             while IFS= read -r -d '' FILE; do
                 FILE_PATH=$(get_dropbox_file_path "$FILE")
-                bashio::log.info "Sync $FILE to $FILE_PATH on Dropbox"
+                bashio::log.debug "Sync $FILE to $FILE_PATH on Dropbox"
                 check_network_access
                 EXIT_CODE=0
                 RESPONSE=$(./dropbox_uploader.sh -q -s -f $CONFIG_FILE upload "$FILE" "$FILE_PATH") || EXIT_CODE=$?
                 if [ $EXIT_CODE -eq 0 ]; then
-                    bashio::log.info "Synced file to Dropbox"
+                    bashio::log.info "Synced $FILE to $FILE_PATH on Dropbox"
                 else
-                    bashio::log.fatal "Failed to sync file to Dropbox"
+                    bashio::log.fatal "Failed to sync $FILE to $FILE_PATH on Dropbox"
                     [ "$RESPONSE" != "" ] && bashio::log.fatal "$RESPONSE"
                 fi
                 EXIT_CODE=0

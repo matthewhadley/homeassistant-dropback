@@ -1,3 +1,9 @@
+## [5.1.0] - 2022-09-18
+
+### Changed
+
+- More succinct log output
+
 ## [5.0.1] - 2022-09-10
 
 ### Changed
