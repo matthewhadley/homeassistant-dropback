@@ -1,11 +1,12 @@
 name: "Dropback"
 description: "Sync Home Assistant backups to Dropbox"
 url: "https://github.com/matthewhadley/homeassistant-dropback"
-version: "5.1.0"
+version: "5.2.0"
 slug: "dropback"
 init: false
 stdin: true
 hassio_api: true
+homeassistant_api: true
 hassio_role: backup
 map:
   - backup:rw

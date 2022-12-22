@@ -1,3 +1,10 @@
+## [5.2.0] - 2022-12-21
+
+### Added
+
+- Added `dropback.status` entity showing status of add-on
+- Added `dropback.sync` entity showing file currently being sync'd
+
 ## [5.1.0] - 2022-09-18
 
 ### Changed

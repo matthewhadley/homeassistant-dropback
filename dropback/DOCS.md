@@ -49,3 +49,12 @@ data:
   addon: 719b45ef_dropback
   input: sync
 ```
+
+### Entities
+
+The add-on creates an entity `dropback.status` with the current status of the add-on:
+
+- `OK` (on start-up and updated on each succesful file sync to Dropbox)
+- `Error` (an error occured preventing sync to Dropbox)
+
+The add-on also creates an entity `dropback.sync` showing the file currently being sync'd.
