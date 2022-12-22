@@ -1,3 +1,13 @@
+## [6.0.0] - 2022-12-22
+
+### Changed
+
+- Backup files now operated on in last modified order
+
+### Added
+
+- Added `dropback.last` entity showing last file that was sync'd
+
 ## [5.2.0] - 2022-12-21
 
 ### Added

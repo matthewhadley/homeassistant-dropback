@@ -61,19 +61,19 @@ get_dropbox_file_path() {
 }
 
 # create/update HASS entities
-set_dropback_entity_status() {
+set_dropback_entity() {
     timestamp=$(date '+%Y-%m-%dT%H:%M:%S')
-    curl --silent -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/states/dropback.status -d '{"state":"'"$1"'", "attributes":{"friendly_name":"Dropback Status", "timestamp":"'"$timestamp"'"}}'
-}
-set_dropback_entity_sync() {
-    timestamp=$(date '+%Y-%m-%dT%H:%M:%S')
-    curl --silent -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/core/api/states/dropback.sync -d '{"state":"'"$1"'", "attributes":{"friendly_name":"Dropback Sync", "timestamp":"'"$timestamp"'"}}'
+    entity="${1,}"
+    name="$1"
+    state="$2"
+    payload='{"state":"'"$state"'", "attributes":{"friendly_name":"Dropback '"$name"'", "timestamp":"'"$timestamp"'"}}'
+    curl --silent -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/states/dropback.${entity}" -d "$payload"
 }
 
 # configure Dropbox access
 bashio::log.info "Initializing Dropback"
-set_dropback_entity_status "OK"
-set_dropback_entity_sync "None"
+set_dropback_entity Status OK
+set_dropback_entity Sync None
 
 if [ ! -e "$CONFIG_FILE" ]; then
     bashio::log.info "No config file found, requesting long lived Refresh Token..."
@@ -95,7 +95,7 @@ if [ ! -e "$CONFIG_FILE" ]; then
         bashio::log.fatal "Error getting Refresh Token"
         bashio::log.fatal "$ERROR $ERROR_DESCRIPTION"
         warn_about_access_token
-        set_dropback_entity_status "Error"
+        set_dropback_entity Status Error
         bashio::exit.nok
     else
         # ensure app has correct permissions
@@ -106,7 +106,7 @@ if [ ! -e "$CONFIG_FILE" ]; then
             bashio::log.fatal "Missing scope \"$REQUIRED_SCOPE\""
             bashio::log.fatal "Please ensure the app has scope \"$REQUIRED_SCOPE\" enabled in the \"Permissions\" tab on dropbox.com/developers/apps"
             warn_about_access_token
-            set_dropback_entity_status "Error"
+            set_dropback_entity Status Error
             bashio::exit.nok
         fi
     fi
@@ -135,7 +135,7 @@ else
     [ "$RESPONSE" != "" ] && bashio::log.fatal "$RESPONSE"
     warn_about_access_token
     rm "$CONFIG_FILE"
-    set_dropback_entity_status "Error"
+    set_dropback_entity Status Error
     bashio::exit.nok
 fi
 
@@ -158,8 +158,8 @@ while read -r INPUT; do
                 [ "$DELETE_OLDER_THAN" != "1" ] && PLURAL='s'
                 bashio::log.info "Deleting files older than $DELETE_OLDER_THAN day${PLURAL}..."
                 # adjust DELETE_OLDER_THAN value down by 1 for correct mtime value
-                find $BACKUP_DIR -maxdepth 1 -mtime +$(($DELETE_OLDER_THAN-1)) -type f -name "*.tar" -print0 |
-                while IFS= read -r -d '' FILE; do
+                find $BACKUP_DIR -maxdepth 1 -mtime +$(($DELETE_OLDER_THAN-1)) -type f -name "*.tar" -exec ls -1rt "{}" + |
+                while read -r FILE; do
                     # get Dropbox file path to use to remove from Dropbox after local delete
                     if [[ $SYNC_DELETES = "true" ]]; then
                         FILE_PATH=$(get_dropbox_file_path "$FILE")
@@ -185,26 +185,27 @@ while read -r INPUT; do
 
             # find remaining files and sync to dropbox
             bashio::log.info "Syncing local files to Dropbox..."
-            find $BACKUP_DIR -maxdepth 1 -type f -name "*.tar" -print0 |
-            while IFS= read -r -d '' FILE; do
+            find $BACKUP_DIR -maxdepth 1 -type f -name "*.tar" -exec ls -1rt "{}" + |
+            while read -r FILE; do
                 FILE_PATH=$(get_dropbox_file_path "$FILE")
-                set_dropback_entity_sync "${FILE_PATH/\//}"
+                set_dropback_entity Sync "${FILE_PATH/\//}"
                 bashio::log.debug "Sync $FILE to $FILE_PATH on Dropbox"
                 check_network_access
                 EXIT_CODE=0
                 RESPONSE=$(./dropbox_uploader.sh -q -s -f $CONFIG_FILE upload "$FILE" "$FILE_PATH") || EXIT_CODE=$?
                 if [ $EXIT_CODE -eq 0 ]; then
                     bashio::log.info "Synced $FILE to $FILE_PATH on Dropbox"
-                    set_dropback_entity_status "OK"
+                    set_dropback_entity Status OK
+                    set_dropback_entity Last "${FILE_PATH/\//}"
                 else
                     bashio::log.fatal "Failed to sync $FILE to $FILE_PATH on Dropbox"
                     [ "$RESPONSE" != "" ] && bashio::log.fatal "$RESPONSE"
-                    set_dropback_entity_status "Error"
+                    set_dropback_entity Status Error
                 fi
                 EXIT_CODE=0
             done
             bashio::log.info "Syncing done"
-            set_dropback_entity_sync "None"
+            set_dropback_entity Sync None
 
         fi
     else
