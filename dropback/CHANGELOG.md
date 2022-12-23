@@ -1,3 +1,9 @@
+## [6.0.1] - 2022-12-23
+
+### Fixed
+
+- Remove debug output from logs
+
 ## [6.0.0] - 2022-12-22
 
 ### Changed

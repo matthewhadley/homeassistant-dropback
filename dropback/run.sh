@@ -67,7 +67,7 @@ set_dropback_entity() {
     name="$1"
     state="$2"
     payload='{"state":"'"$state"'", "attributes":{"friendly_name":"Dropback '"$name"'", "timestamp":"'"$timestamp"'"}}'
-    curl --silent -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/states/dropback.${entity}" -d "$payload"
+    curl --silent -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/states/dropback.${entity}" -d "$payload" > /dev/null
 }
 
 # configure Dropbox access
