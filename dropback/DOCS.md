@@ -54,11 +54,11 @@ data:
 
 The add-on creates three entities:
 
-`dropback.status` with the current status of the add-on:
+`sensor.dropback_status` with the current status of the add-on:
 
 - `OK` (on start-up and updated on each succesful file sync to Dropbox)
 - `Error` (an error occured preventing sync to Dropbox)
 
-`dropback.sync` showing the file currently being sync'd.
+`sensor.dropback_sync` showing the file currently being sync'd.
 
-`dropback.last` showing the last file sync'd.
+`sensor.dropback_last` showing the last file sync'd.

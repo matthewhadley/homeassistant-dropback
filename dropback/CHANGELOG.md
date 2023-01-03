@@ -1,3 +1,12 @@
+## [7.0.0] - 2023-01-02
+
+### Changed
+
+- Renamed sensors to better match Home Assistant conventions
+    - `dropback.status` to `sensor.dropback_status`
+    - `dropback.sync` to `sensor.dropback_sync`
+    - `dropback.last` to `sensor.dropback_last`
+
 ## [6.0.1] - 2022-12-23
 
 ### Fixed
