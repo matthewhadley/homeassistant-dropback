@@ -1,3 +1,9 @@
+## [7.1.0] - 2023-01-02
+
+### Added
+
+- Add icons to sensors created by Dropback
+
 ## [7.0.0] - 2023-01-02
 
 ### Changed

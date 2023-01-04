@@ -66,7 +66,7 @@ set_dropback_entity() {
     entity="${1,}"
     name="$1"
     state="$2"
-    payload='{"state":"'"$state"'", "attributes":{"friendly_name":"Dropback '"$name"'", "timestamp":"'"$timestamp"'"}}'
+    payload='{"state":"'"$state"'", "attributes":{"friendly_name":"Dropback '"$name"'", "timestamp":"'"$timestamp"'", "icon": "mdi:dropbox"}}'
     curl --silent -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/states/sensor.dropback_${entity}" -d "$payload" > /dev/null
 }
 
