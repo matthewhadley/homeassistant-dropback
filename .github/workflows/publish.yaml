@@ -1,0 +1,39 @@
+name: Publish
+on: push
+
+jobs:
+  build:
+    name: Publish On Version Bump
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Check Version Bump
+        id: check_version_bumb
+        run: |
+          c=$(grep version < dropback/config.yaml | grep -o '[0-9\.]*');
+          p=$(git show HEAD~1:dropback/config.yaml | grep version | grep -o '[0-9\.]*');
+          echo "Current version: $c"
+          echo " Commit version: $p"
+          if [[ ! -z "$c" && "$c" != "$p" ]]; then
+            echo "New version detected: $c"
+            echo VERSION_BUMP=true >> $GITHUB_ENV;
+          else
+            echo "No version change"
+          fi
+      - name: Login to DockerHub
+        if: env.VERSION_BUMP == 'true'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Publish
+        if: env.VERSION_BUMP == 'true'
+        uses: home-assistant/builder@master
+        with:
+          args: |
+            --all \
+            --target dropback \
+            --docker-hub matthewhadley
