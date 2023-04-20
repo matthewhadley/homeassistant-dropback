@@ -1,3 +1,9 @@
+## [7.1.1] - 2023-04-20
+
+### Added
+
+- Add usage example to docs
+
 ## [7.1.0] - 2023-01-02
 
 ### Added
