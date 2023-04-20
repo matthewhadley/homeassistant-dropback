@@ -41,13 +41,34 @@ The one-use Access Code typically expires in ~4hrs and is used on the first run 
 
 ### Usage
 
-Once the Add-on is started, it is listening for service calls. You can trigger a sync operation by calling the `hassio.addon_stdin` service with the following YAML:
+Once the Add-on is started, it is listening for service calls and will only perform syncs when activated. You can trigger a sync operation by calling the `hassio.addon_stdin` service with the following YAML:
 
 ```yaml
 service: hassio.addon_stdin
 data:
   addon: 719b45ef_dropback
   input: sync
+```
+
+Typical usage might be to have an automation that syncs backup files at a regular interval. Here is some example
+YAML for an automation that creates a backup nightly at 3am, waits 15 minutes and then syncs all backups to Dropbox.
+
+```yaml
+alias: System Backup To Dropbox
+description: ""
+trigger:
+  - platform: time
+    at: "03:00:00"
+action:
+  - service: hassio.backup_full
+    data:
+      name: "{{ now().strftime('%Y-%m-%d') }}"
+  - delay: "00:15:00"
+  - service: hassio.addon_stdin
+    data:
+      addon: 719b45ef_dropback
+      input: sync
+mode: single
 ```
 
 ### Entities
