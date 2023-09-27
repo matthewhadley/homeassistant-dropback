@@ -74,6 +74,7 @@ set_dropback_entity() {
 bashio::log.info "Initializing Dropback"
 set_dropback_entity Status OK
 set_dropback_entity Sync None
+set_dropback_entity Last None
 
 if [ ! -e "$CONFIG_FILE" ]; then
     bashio::log.info "No config file found, requesting long lived Refresh Token..."
