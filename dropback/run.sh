@@ -70,10 +70,19 @@ set_dropback_entity() {
     curl --silent -X POST -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/states/sensor.dropback_${entity}" -d "$payload" > /dev/null
 }
 
+get_dropback_entity() {
+    entity="$1"
+    curl --silent -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" "http://supervisor/core/api/states/sensor.dropback_${entity}" | jq -r '.state'
+}
+
 # configure Dropbox access
 bashio::log.info "Initializing Dropback"
 set_dropback_entity Status OK
 set_dropback_entity Sync None
+LAST_SYNC_STATE=$(get_dropback_entity Last)
+if [ "$LAST_SYNC_STATE" == null ]; then
+  set_dropback_entity Last None
+fi
 
 if [ ! -e "$CONFIG_FILE" ]; then
     bashio::log.info "No config file found, requesting long lived Refresh Token..."

@@ -1,3 +1,9 @@
+## [7.2.0] - 2023-09-27
+
+### Added
+
+- Set Last Sync sensor to `None` if it is not set
+
 ## [7.1.1] - 2023-04-20
 
 ### Added
@@ -15,9 +21,9 @@
 ### Changed
 
 - Renamed sensors to better match Home Assistant conventions
-    - `dropback.status` to `sensor.dropback_status`
-    - `dropback.sync` to `sensor.dropback_sync`
-    - `dropback.last` to `sensor.dropback_last`
+  - `dropback.status` to `sensor.dropback_status`
+  - `dropback.sync` to `sensor.dropback_sync`
+  - `dropback.last` to `sensor.dropback_last`
 
 ## [6.0.1] - 2022-12-23
 
