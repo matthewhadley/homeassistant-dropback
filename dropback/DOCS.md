@@ -8,8 +8,6 @@ This Add-on will sync all `/backup/*.tar` files to Dropbox and optionally delete
 
 This Add-on allows you to upload your Home Assistant backups to your Dropbox, keeping your backups safe and available in case of hardware failure. Uploads are triggered via a service call, making it easy to automate periodic backups or trigger uploads to Dropbox on demand.
 
-The inspiration for this Add-on came from https://github.com/danielwelch/hassio-dropbox-sync/ which appears to no longer be maintained.
-
 You will need to create a Dropbox App and generate an Access Token for this Add-on to work.
 
 ### Installation
@@ -84,4 +82,22 @@ The add-on creates three entities:
 
 `sensor.dropback_last` showing the last file sync'd.
 
-Note that these sensor values are unable to persist if Home Assistant is restarted and will become `unknown` (see https://github.com/matthewhadley/homeassistant-dropback/pull/10#issuecomment-1739581649). A potential solution for this is to have an automation that restarts the dropback addon when Home Assistant restarts.
+Note that these sensor values are unable to persist if Home Assistant is restarted and will become `unknown` (see https://github.com/matthewhadley/homeassistant-dropback/pull/10#issuecomment-1739581649). They will be re-created when Dropback is restarted or performs a sync operation. So a potential solution to "persist" these sensors is to have an automation that restarts the dropback addon when Home Assistant restarts.
+
+```
+alias: Initialize Dropback Sensors
+description: ""
+trigger:
+  - platform: homeassistant
+    event: start
+condition: []
+action:
+  - service: hassio.addon_start
+    data:
+      addon: 719b45ef_dropback
+mode: single
+```
+
+### Acknowledgement
+
+The inspiration for this Add-on came from https://github.com/danielwelch/hassio-dropbox-sync/ which appears to no longer be maintained.
