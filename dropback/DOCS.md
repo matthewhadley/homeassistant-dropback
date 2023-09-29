@@ -83,3 +83,5 @@ The add-on creates three entities:
 `sensor.dropback_sync` showing the file currently being sync'd.
 
 `sensor.dropback_last` showing the last file sync'd.
+
+Note that these sensor values are unable to persist if Home Assistant is restarted and will become `unknown` (see https://github.com/matthewhadley/homeassistant-dropback/pull/10#issuecomment-1739581649). A potential solution for this is to have an automation that restarts the dropback addon when Home Assistant restarts.
