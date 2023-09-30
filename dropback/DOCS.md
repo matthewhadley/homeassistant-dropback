@@ -82,7 +82,10 @@ The add-on creates three entities:
 
 `sensor.dropback_last` showing the last file sync'd.
 
-Note that these sensor values are unable to persist if Home Assistant is restarted and will become `unknown` (see https://github.com/matthewhadley/homeassistant-dropback/pull/10#issuecomment-1739581649). They will be re-created when Dropback is restarted or performs a sync operation. So a potential solution to "persist" these sensors is to have an automation that restarts the dropback addon when Home Assistant restarts.
+Note that these sensor values are unable to persist if Home Assistant is restarted and will become `unknown` (see https://github.com/matthewhadley/homeassistant-dropback/pull/10#issuecomment-1739581649). They will be re-created when Dropback is restarted or performs a sync operation.
+
+There are two potential soltions to this:
+- an automation to initialize the sensors on Home Assistant restarts (by restarting the Add-On)
 
 ```
 alias: Initialize Dropback Sensors
@@ -96,6 +99,33 @@ action:
     data:
       addon: 719b45ef_dropback
 mode: single
+```
+
+- Mirroring the Dropback sensors with Trigger sensors that are persistent
+
+```
+template:
+  - trigger:
+      platform: state
+      entity_id: sensor.dropback_status
+    sensor:
+      name: Dropback Recorded Status
+      icon: mdi:dropbox
+      state: "{{ trigger.to_state.state }}"
+  - trigger:
+      platform: state
+      entity_id: sensor.dropback_sync
+    sensor:
+      name: Dropback Recorded Sync
+      icon: mdi:dropbox
+      state: "{{ trigger.to_state.state }}"
+  - trigger:
+      platform: state
+      entity_id: sensor.dropback_last
+    sensor:
+      name: Dropback Recorded Last
+      icon: mdi:dropbox
+      state: "{{ trigger.to_state.state }}"
 ```
 
 ### Acknowledgement
