@@ -12,7 +12,7 @@ You will need to create a Dropbox App and generate an Access Token for this Add-
 
 ### Installation
 
-1. Add the Add-on repository to your Home Assistant instance: `https://github.com/matthewhadley/homeassistant-dropback`
+1. Add the Add-on repository to your Home Assistant Add-on Store by adding this repository: `https://github.com/matthewhadley/homeassistant-dropback` (need help? see https://www.home-assistant.io/addons on how to install third party Add-ons).
 2. Install the Dropback Add-on
 3. Configure the Add-on following the steps below
 
@@ -85,6 +85,7 @@ The add-on creates three entities:
 Note that these sensor values are unable to persist if Home Assistant is restarted and will become `unknown` (see https://github.com/matthewhadley/homeassistant-dropback/pull/10#issuecomment-1739581649). They will be re-created when Dropback is restarted or performs a sync operation.
 
 There are two potential soltions to this:
+
 - an automation to initialize the sensors on Home Assistant restarts (by restarting the Add-On)
 
 ```
