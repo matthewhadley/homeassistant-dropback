@@ -25,7 +25,10 @@ declare __BASHIO_LOG_TIMESTAMP="%Y-%m-%d %T"
 
 warn_about_access_token() {
     bashio::log.fatal "Please check App Key and App Secret configuration values and generate a new Access Token"
-    bashio::log.fatal "A new Access Token can be generated at: $DROPBOX_ACCESS_TOKEN_URL"
+    bashio::log.fatal "A new Access Token can be generated at:"
+    bashio::log
+    bashio::log "$DROPBOX_ACCESS_TOKEN_URL"
+    bashio::log
 }
 
 check_network_access() {

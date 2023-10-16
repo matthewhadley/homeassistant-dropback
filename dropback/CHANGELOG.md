@@ -1,3 +1,9 @@
+## [7.2.1] - 2023-10-16
+
+### Fixed
+
+- display re-auth url correctly in logs on error
+
 ## [7.2.0] - 2023-09-27
 
 ### Added
