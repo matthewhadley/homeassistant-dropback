@@ -185,9 +185,11 @@ while read -r INPUT; do
                         RESPONSE=$(./dropbox_uploader.sh -q -f $CONFIG_FILE delete "$FILE_PATH") || EXIT_CODE=$?
                         if [ $EXIT_CODE -eq 0 ]; then
                             bashio::log.info "Deleted $FILE_PATH on Dropbox"
+                            set_dropback_entity Status OK
                         else
-                            bashio::log.fatal "Failed to delete $FILE_PATH on Dropbox"
-                            [ "$RESPONSE" != "" ] && bashio::log.fatal "$RESPONSE"
+                            set_dropback_entity Status Error
+                            bashio::log.warn "Failed to delete $FILE_PATH on Dropbox"
+                            [ "$RESPONSE" != "" ] && bashio::log.warn "$RESPONSE"
                         fi
                     fi
                     EXIT_CODE=0
