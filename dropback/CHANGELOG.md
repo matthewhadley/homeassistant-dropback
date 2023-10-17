@@ -1,5 +1,11 @@
 ## [7.3.0] - 2023-10-17
 
+### Fixed
+
+- use `warning` log level
+
+## [7.3.0] - 2023-10-17
+
 ### Added
 
 - record an error state when fail to sync a delete to Dropbox

@@ -188,8 +188,8 @@ while read -r INPUT; do
                             set_dropback_entity Status OK
                         else
                             set_dropback_entity Status Error
-                            bashio::log.warn "Failed to delete $FILE_PATH on Dropbox"
-                            [ "$RESPONSE" != "" ] && bashio::log.warn "$RESPONSE"
+                            bashio::log.warning "Failed to delete $FILE_PATH on Dropbox"
+                            [ "$RESPONSE" != "" ] && bashio::log.warning "$RESPONSE"
                         fi
                     fi
                     EXIT_CODE=0
