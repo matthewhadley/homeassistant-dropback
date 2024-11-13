@@ -1,3 +1,9 @@
+## [7.3.2] - 2024-11-13
+
+### Changed
+
+- update example automation documentation
+
 ## [7.3.1] - 2023-10-17
 
 ### Fixed
