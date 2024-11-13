@@ -49,23 +49,22 @@ data:
 ```
 
 Typical usage might be to have an automation that syncs backup files at a regular interval. Here is some example
-YAML for an automation that creates a backup nightly at 3am, waits 15 minutes and then syncs all backups to Dropbox.
+YAML for an automation that creates a backup nightly at 3am, then syncs all backups to Dropbox.
 
 ```yaml
 alias: System Backup To Dropbox
 description: ""
-trigger:
-  - platform: time
-    at: "03:00:00"
-action:
-  - service: hassio.backup_full
-    data:
+triggers:
+  - at: "03:00:00"
+    trigger: time
+actions:
+  - data:
       name: "{{ now().strftime('%Y-%m-%d') }}"
-  - delay: "00:15:00"
-  - service: hassio.addon_stdin
-    data:
+    action: hassio.backup_full
+  - data:
       addon: 719b45ef_dropback
       input: sync
+    action: hassio.addon_stdin
 mode: single
 ```
 
