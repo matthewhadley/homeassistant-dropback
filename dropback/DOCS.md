@@ -106,26 +106,26 @@ mode: single
 ```
 template:
   - trigger:
-      platform: state
+      trigger: state
       entity_id: sensor.dropback_status
     sensor:
-      name: Dropback Recorded Status
-      icon: mdi:dropbox
-      state: "{{ trigger.to_state.state }}"
+      - name: Dropback Recorded Status
+        icon: mdi:dropbox
+        state: "{{ trigger.to_state.state }}"
   - trigger:
-      platform: state
+      trigger: state
       entity_id: sensor.dropback_sync
     sensor:
-      name: Dropback Recorded Sync
-      icon: mdi:dropbox
-      state: "{{ trigger.to_state.state }}"
+      - name: Dropback Recorded Sync
+        icon: mdi:dropbox
+        state: "{{ trigger.to_state.state }}"
   - trigger:
-      platform: state
+      trigger: state
       entity_id: sensor.dropback_last
     sensor:
-      name: Dropback Recorded Last
-      icon: mdi:dropbox
-      state: "{{ trigger.to_state.state }}"
+      - name: Dropback Recorded Last
+        icon: mdi:dropbox
+        state: "{{ trigger.to_state.state }}"
 ```
 
 ### Acknowledgement
