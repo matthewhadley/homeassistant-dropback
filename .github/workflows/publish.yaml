@@ -13,8 +13,14 @@ jobs:
       - name: Check Version Bump
         id: check_version_bumb
         run: |
-          c=$(grep version < dropback/config.yaml | grep -o '[0-9\.]*');
-          p=$(git show HEAD~1:dropback/config.yaml | grep version | grep -o '[0-9\.]*');
+          target=$(find . -type f -name "config.yaml" -exec dirname {} \; | awk -F'/' '{print $NF}')
+          c=$(grep version < ${target}/config.yaml | grep -o '[0-9\.]*');
+          p=$(git show HEAD~1:${target}/config.yaml 2> /dev/null)
+          if [ $? -eq 128 ]; then
+            p=0
+          else
+            p=$(echo "$p" | grep version | grep -o '[0-9\.]*');
+          fi;
           echo "Current version: $c"
           echo " Commit version: $p"
           if [[ ! -z "$c" && "$c" != "$p" ]]; then
@@ -35,5 +41,5 @@ jobs:
         with:
           args: |
             --all \
-            --target dropback \
-            --docker-hub matthewhadley
+            --target $(find . -type f -name "Dockerfile" -exec dirname {} \; | awk -F'/' '{print $NF}') \
+            --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
