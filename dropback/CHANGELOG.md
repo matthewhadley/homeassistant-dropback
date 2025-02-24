@@ -1,3 +1,9 @@
+## [7.3.3] - 2025-02-24
+
+### Fixed
+
+- do no show an error for backups with no name configured (such as new automatic backups)
+
 ## [7.3.2] - 2024-11-13
 
 ### Changed
