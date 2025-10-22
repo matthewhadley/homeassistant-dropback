@@ -86,25 +86,7 @@ The add-on creates three entities:
 
 Note that these sensor values are unable to persist if Home Assistant is restarted and will become `unknown` (see https://github.com/matthewhadley/homeassistant-dropback/pull/10#issuecomment-1739581649). They will be re-created when Dropback is restarted or performs a sync operation.
 
-There are two potential soltions to this:
-
-- an automation to initialize the sensors on Home Assistant restarts (by restarting the Add-On)
-
-```
-alias: Initialize Dropback Sensors
-description: ""
-trigger:
-  - platform: homeassistant
-    event: start
-condition: []
-action:
-  - service: hassio.addon_start
-    data:
-      addon: 719b45ef_dropback
-mode: single
-```
-
-- Mirroring the Dropback sensors with Trigger sensors that are persistent
+It's recommended to create these template sensors that will keep a persistent value:
 
 ```
 template:
@@ -130,6 +112,8 @@ template:
         icon: mdi:dropbox
         state: "{{ trigger.to_state.state }}"
 ```
+
+The original sensors can be added to ignore in [recorder](https://www.home-assistant.io/integrations/recorder/) if desired.
 
 ### Acknowledgement
 
