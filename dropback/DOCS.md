@@ -58,13 +58,16 @@ triggers:
   - at: "03:00:00"
     trigger: time
 actions:
-  - data:
+  - action: hassio.backup_full
+    data:
       name: "{{ now().strftime('%Y-%m-%d') }}"
-    action: hassio.backup_full
-  - data:
+      compressed: true
+      homeassistant_exclude_database: false
+      location: /backup
+  - action: hassio.addon_stdin
+      data:
       addon: 719b45ef_dropback
       input: sync
-    action: hassio.addon_stdin
 mode: single
 ```
 
