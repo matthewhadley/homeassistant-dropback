@@ -40,6 +40,6 @@ jobs:
         uses: home-assistant/builder@master
         with:
           args: |
-            --all \
+            --amd64 --aarch64 \
             --target $(find . -type f -name "Dockerfile" -exec dirname {} \; | awk -F'/' '{print $NF}') \
             --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
