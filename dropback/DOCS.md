@@ -65,7 +65,7 @@ actions:
       homeassistant_exclude_database: false
       location: /backup
   - action: hassio.addon_stdin
-      data:
+    data:
       addon: 719b45ef_dropback
       input: sync
 mode: single
