@@ -42,7 +42,7 @@ The one-use Access Code typically expires in ~4hrs and is used on the first run 
 Once the Add-on is started, it is listening for service calls and will only perform syncs when activated. You can trigger a sync operation by calling the `hassio.addon_stdin` service with the following YAML:
 
 ```yaml
-service: hassio.addon_stdin
+action: hassio.addon_stdin
 data:
   addon: 719b45ef_dropback
   input: sync
